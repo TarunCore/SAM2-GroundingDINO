@@ -30,9 +30,11 @@ WORKDIR $HOME/GroundingDINO
 # RUN git checkout -q 57535c5a79791cb76e36fdb64975271354f10251
 RUN pip install -e .
 
+WORKDIR $HOME
 # Install Python dependencies
-COPY requirements2.txt $HOME/
-RUN pip install --no-cache-dir -r requirements2.txt
+# Skipping the requirements2.txt for now as torch and torchvision are already installed from Grounding DINO
+# COPY requirements2.txt $HOME/
+# RUN pip install --no-cache-dir -r requirements2.txt
 COPY requirements.txt $HOME/
 RUN pip install --no-cache-dir -r requirements.txt
 
