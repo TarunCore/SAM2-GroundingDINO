@@ -57,7 +57,7 @@ ENV TORCH_CUDA_ARCH_LIST="6.0;6.1;7.0;7.5;8.0;8.6+PTX;8.9;9.0"
 # Install GroundingDINO and SAM
 RUN git clone https://github.com/IDEA-Research/GroundingDINO.git $HOME/GroundingDINO
 WORKDIR $HOME/GroundingDINO
-RUN git checkout -q 57535c5a79791cb76e36fdb64975271354f10251
+# RUN git checkout -q 57535c5a79791cb76e36fdb64975271354f10251
 RUN pip install -e .
 
 # Copy the script into the container
