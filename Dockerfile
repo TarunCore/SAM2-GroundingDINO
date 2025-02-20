@@ -13,31 +13,28 @@ RUN apt-get update && apt-get install -y wget
 WORKDIR $HOME
 
 # Install system dependencies
+# After the initial FROM and ENV statements, but before the WORKDIR command:
 RUN apt-get update && apt-get install -y \
-    git \
-    wget \
-    python3-pip \
-    python3-dev \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
-    # && rm -rf /var/lib/apt/lists/*
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y \
+    python3.11 \
+    python3.11-dev \
+    python3.11-distutils \
+    && wget https://bootstrap.pypa.io/get-pip.py \
+    && python3.11 get-pip.py \
+    && rm get-pip.py \
+    && ln -s /usr/bin/python3.11 /usr/local/bin/python3 \
+    && ln -s /usr/bin/python3.11 /usr/local/bin/python
 
-# Install Python 3.11
-RUN add-apt-repository ppa:deadsnakes/ppa -y && \
-    apt-get update && \
-    apt-get install -y python3.11 python3.11-dev python3.11-venv python3-pip && \
-    rm -rf /var/lib/apt/lists/*
-
-# Set Python 3.11 as default
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
-RUN update-alternatives --config python3
-
-RUN python3 -m pip install --upgrade pip
+# Then make sure pip commands use python3.11
+RUN python3.11 -m pip install --upgrade pip
 
 WORKDIR $HOME
 # Install Python dependencies
 COPY pytorch_requirements.txt $HOME/
-RUN pip install --no-cache-dir -r pytorch_requirements.txt
+RUN python3.11 -m pip install --no-cache-dir -r pytorch_requirements.txt
 # COPY requirements.txt $HOME/
 # RUN pip install --no-cache-dir -r requirements.txt
 
