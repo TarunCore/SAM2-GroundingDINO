@@ -22,6 +22,11 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
+WORKDIR $HOME
+# Install Pytorch and torchvision
+COPY requirements2.txt $HOME/
+RUN pip install --no-cache-dir -r requirements2.txt
+
 # ENV TORCH_CUDA_ARCH_LIST="6.0;6.1;7.0;7.5;8.0;8.6+PTX;8.9;9.0"
 ENV CUDA_HOME=/usr/local/cuda
 # Install GroundingDINO and SAM
@@ -50,7 +55,7 @@ RUN wget -q https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
 WORKDIR $HOME
 RUN pip install 'git+https://github.com/facebookresearch/segment-anything.git'
 # RUN pip install supervision==0.6.0
-RUN pip install roboflow
+# RUN pip install roboflow
 
 
 # Set up data directory
