@@ -20,7 +20,26 @@ RUN apt-get update && apt-get install -y \
     python3-dev \
     libgl1-mesa-glx \
     libglib2.0-0 \
-    && rm -rf /var/lib/apt/lists/*
+    # && rm -rf /var/lib/apt/lists/*
+
+# Install Python 3.11
+RUN add-apt-repository ppa:deadsnakes/ppa -y && \
+    apt-get update && \
+    apt-get install -y python3.11 python3.11-dev python3.11-venv python3-pip && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set Python 3.11 as default
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
+RUN update-alternatives --config python3
+
+RUN python3 -m pip install --upgrade pip
+
+WORKDIR $HOME
+# Install Python dependencies
+COPY pytorch_requirements.txt $HOME/
+RUN pip install --no-cache-dir -r pytorch_requirements.txt
+# COPY requirements.txt $HOME/
+# RUN pip install --no-cache-dir -r requirements.txt
 
 # ENV TORCH_CUDA_ARCH_LIST="6.0;6.1;7.0;7.5;8.0;8.6+PTX;8.9;9.0"
 ENV CUDA_HOME=/usr/local/cuda
@@ -28,15 +47,7 @@ ENV CUDA_HOME=/usr/local/cuda
 RUN git clone https://github.com/IDEA-Research/GroundingDINO.git $HOME/GroundingDINO
 WORKDIR $HOME/GroundingDINO
 # RUN git checkout -q 57535c5a79791cb76e36fdb64975271354f10251
-RUN pip install -e .
-
-WORKDIR $HOME
-# Install Python dependencies
-# Skipping the requirements2.txt for now as torch and torchvision are already installed from Grounding DINO
-# COPY requirements2.txt $HOME/
-# RUN pip install --no-cache-dir -r requirements2.txt
-COPY requirements.txt $HOME/
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python3.11 -m pip install -v -e .
 
 # Download model weights
 RUN mkdir -p $HOME/weights
@@ -68,6 +79,7 @@ RUN wget -q https://media.roboflow.com/notebooks/examples/dog-8.jpeg
 
 # Copy the script into the container
 COPY completebuild.ipynb $HOME/
+WORKDIR $HOME
 EXPOSE 8888
 # Set the default command to run the script
 # CMD ["jupyter", "nbconvert", "--to", "notebook", "--execute", "completebuild.ipynb"]
