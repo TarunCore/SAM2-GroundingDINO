@@ -16,6 +16,9 @@ RUN apt-get -y update && apt-get install -y --no-install-recommends \
          ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
+RUN echo "export CONDA_PREFIX=/opt/conda" >> ~/.bashrc
+ENV CONDA_PREFIX=/opt/conda
+    
 ENV HOME=/opt/program
 # Set the working directory for all the subsequent Dockerfile instructions.
 WORKDIR /opt/program
