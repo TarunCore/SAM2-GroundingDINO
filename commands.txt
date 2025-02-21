@@ -5,3 +5,6 @@ torch==2.5.1+cu124
 torchvision==0.20.1+cu124
 
 https://github.com/IDEA-Research/GroundingDINO/issues/377
+https://github.com/IDEA-Research/GroundingDINO/issues/355
+https://stackoverflow.com/questions/6622454/cuda-incompatible-with-my-gcc-version
+https://github.com/huggingface/transformers/issues/35349
