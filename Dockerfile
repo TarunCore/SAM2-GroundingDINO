@@ -44,32 +44,29 @@ COPY requirements.txt $HOME/
 RUN pip install --no-cache-dir -r requirements.txt
 
 # # Download model weights
-# RUN mkdir -p $HOME/weights
-# WORKDIR $HOME/weights
+RUN mkdir -p $HOME/weights
+WORKDIR $HOME/weights
 # RUN wget -q https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth
-# # COPY groundingdino_swint_ogc.pth $HOME/weights
+COPY groundingdino_swint_ogc.pth $HOME/weights
 # RUN wget -q https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
-# # COPY sam_vit_h_4b8939.pth $HOME/weights
+COPY sam_vit_h_4b8939.pth $HOME/weights
 
+# # Set up data directory
+RUN mkdir -p $HOME/data
+WORKDIR $HOME/data
+RUN wget -q https://media.roboflow.com/notebooks/examples/dog.jpeg
+RUN wget -q https://media.roboflow.com/notebooks/examples/dog-2.jpeg
+RUN wget -q https://media.roboflow.com/notebooks/examples/dog-3.jpeg
+RUN wget -q https://media.roboflow.com/notebooks/examples/dog-4.jpeg
+RUN wget -q https://media.roboflow.com/notebooks/examples/dog-5.jpeg
+RUN wget -q https://media.roboflow.com/notebooks/examples/dog-6.jpeg
+RUN wget -q https://media.roboflow.com/notebooks/examples/dog-7.jpeg
+RUN wget -q https://media.roboflow.com/notebooks/examples/dog-8.jpeg
 
 # WORKDIR $HOME
 # RUN pip install 'git+https://github.com/facebookresearch/segment-anything.git'
 # # RUN pip install supervision==0.6.0
 # # RUN pip install roboflow
-
-
-# # Set up data directory
-# RUN mkdir -p $HOME/data
-# WORKDIR $HOME/data
-# RUN wget -q https://media.roboflow.com/notebooks/examples/dog.jpeg
-# RUN wget -q https://media.roboflow.com/notebooks/examples/dog-2.jpeg
-# RUN wget -q https://media.roboflow.com/notebooks/examples/dog-3.jpeg
-# RUN wget -q https://media.roboflow.com/notebooks/examples/dog-4.jpeg
-# RUN wget -q https://media.roboflow.com/notebooks/examples/dog-5.jpeg
-# RUN wget -q https://media.roboflow.com/notebooks/examples/dog-6.jpeg
-# RUN wget -q https://media.roboflow.com/notebooks/examples/dog-7.jpeg
-# RUN wget -q https://media.roboflow.com/notebooks/examples/dog-8.jpeg
-
 
 # Copy the script into the container
 COPY completebuild.ipynb $HOME/
