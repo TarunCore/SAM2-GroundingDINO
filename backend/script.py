@@ -8,23 +8,23 @@ import supervision as sv
 from segment_anything import sam_model_registry, SamPredictor
 from groundingdino.util.inference import Model, load_model, load_image, predict, annotate
 
-def parse_args():
+def parse_args(args=None):
     parser = argparse.ArgumentParser(description="Run SAM with GroundingDINO")
     parser.add_argument("--image_path", required=True, help="Path to input image")
     parser.add_argument("--prompt", required=True, help="Text prompt for detection")
     parser.add_argument("--output_path", required=True, help="Path to save output mask")
     parser.add_argument("--box_threshold", type=float, default=0.35, help="Box threshold")
     parser.add_argument("--text_threshold", type=float, default=0.25, help="Text threshold")
-    return parser.parse_args()
+    return parser.parse_args(args)
 
-def main():
-    args = parse_args()
+def main(args=None):
+    args = parse_args(args)
     HOME = os.getcwd()
     
     # Setup paths
     GROUNDING_DINO_CONFIG_PATH = os.path.join(HOME, "GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py")
     GROUNDING_DINO_CHECKPOINT_PATH = os.path.join(HOME, "weights", "groundingdino_swint_ogc.pth")
-    SAM_CHECKPOINT_PATH = os.path.join("/app/weights", "sam_vit_h_4b8939.pth")
+    SAM_CHECKPOINT_PATH = os.path.join(HOME, "weights", "sam_vit_h_4b8939.pth")
     
     # Initialize models
     model = load_model(GROUNDING_DINO_CONFIG_PATH, GROUNDING_DINO_CHECKPOINT_PATH)

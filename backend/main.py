@@ -13,9 +13,9 @@
 
 from flask import Flask, request, send_file
 import os
-import docker
 import tempfile
 from werkzeug.utils import secure_filename
+from script import main as process_image_with_sam
 
 app = Flask(__name__)
 
@@ -37,53 +37,34 @@ def process_image():
     if image.filename == '':
         return {'error': 'No selected file'}, 400
     
-    # Create temporary files for input and output
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.png', dir=UPLOAD_FOLDER) as input_file, \
-         tempfile.NamedTemporaryFile(delete=False, suffix='.png', dir=UPLOAD_FOLDER) as output_file:
-        
-        # Save uploaded image
-        image.save(input_file.name)
-        
-        # Initialize Docker client
-        client = docker.from_env()
-        
-        try:
-            # Run the container
-            container = client.containers.run(
-                'tarune14/sam2-dino:latest',
-                command=[
-                    'python', 'script.py',
-                    '--image_path', '/app/input.png',
-                    '--prompt', prompt,
-                    '--output_path', '/app/output.png'
-                ],
-                volumes={
-                    input_file.name: {'bind': '/app/input.png', 'mode': 'ro'},
-                    output_file.name: {'bind': '/app/output.png', 'mode': 'rw'}
-                },
-                detach=True
-            )
+    try:
+        # Create temporary files for input and output
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.png', dir=UPLOAD_FOLDER) as input_file, \
+             tempfile.NamedTemporaryFile(delete=False, suffix='.png', dir=UPLOAD_FOLDER) as output_file:
             
-            # Wait for container to finish
-            result = container.wait()
+            # Save uploaded image
+            image.save(input_file.name)
             
-            if result['StatusCode'] != 0:
-                return {'error': 'Processing failed'}, 500
+            # Process the image directly
+            process_image_with_sam([
+                '--image_path', input_file.name,
+                '--prompt', prompt,
+                '--output_path', output_file.name
+            ])
             
             # Return the output image
             return send_file(output_file.name, mimetype='image/png')
             
-        except Exception as e:
-            return {'error': str(e)}, 500
+    except Exception as e:
+        return {'error': str(e)}, 500
         
-        finally:
-            # Cleanup
-            try:
-                container.remove()
-            except:
-                pass
+    finally:
+        # Cleanup temporary files
+        try:
             os.unlink(input_file.name)
             os.unlink(output_file.name)
+        except:
+            pass
 
 @app.route('/health', methods=['GET'])
 def health_check():
