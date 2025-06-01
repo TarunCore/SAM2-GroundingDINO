@@ -46,10 +46,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # # Download model weights
 RUN mkdir -p $HOME/weights
 WORKDIR $HOME/weights
-# RUN wget -q https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth
-COPY groundingdino_swint_ogc.pth $HOME/weights
-# RUN wget -q https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
-COPY sam_vit_h_4b8939.pth $HOME/weights
+RUN wget -q https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth
+# COPY groundingdino_swint_ogc.pth $HOME/weights
+RUN wget -q https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
+# COPY sam_vit_h_4b8939.pth $HOME/weights
 
 # # Set up data directory
 RUN mkdir -p $HOME/data
