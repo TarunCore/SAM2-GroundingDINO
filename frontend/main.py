@@ -10,6 +10,8 @@ import tempfile
 import os
 from streamlit_drawable_canvas import st_canvas
 import json
+import requests
+from io import BytesIO
 
 # Initialize session state
 if 'uploaded_image' not in st.session_state:
@@ -20,6 +22,11 @@ if 'voice_text' not in st.session_state:
     st.session_state.voice_text = ""
 if 'processing_mode' not in st.session_state:
     st.session_state.processing_mode = None
+if 'result_mask' not in st.session_state:
+    st.session_state.result_mask = None
+
+# API endpoint configuration
+API_ENDPOINT = "http://localhost:5000/process"
 
 @st.cache_resource
 def load_whisper_model():
@@ -78,17 +85,36 @@ def process_image_click(image, click_point):
 
 def process_image_with_text(image, text_prompt):
     """Process image with GroundingDINO using text prompt"""
-    # Placeholder for GroundingDINO integration
-    st.success(f"Text prompt received: '{text_prompt}'")
-    st.info("This will be connected to GroundingDINO for object detection and mask generation")
-    
-    # You'll replace this with your GroundingDINO integration
-    # Example:
-    # detections = your_grounding_dino_model.predict(image, text_prompt)
-    # masks = convert_detections_to_masks(detections)
-    # return masks
-    
-    return f"GroundingDINO processing for prompt: '{text_prompt}'"
+    try:
+        # Convert PIL Image to bytes
+        img_byte_arr = BytesIO()
+        image.save(img_byte_arr, format='PNG')
+        img_byte_arr = img_byte_arr.getvalue()
+
+        # Prepare the files and data for the request
+        files = {
+            'image': ('image.png', img_byte_arr, 'image/png')
+        }
+        data = {
+            'prompt': text_prompt
+        }
+
+        # Make the API request
+        response = requests.post(API_ENDPOINT, files=files, data=data)
+        
+        if response.status_code == 200:
+            # Convert the response content (mask image) to numpy array
+            mask_bytes = BytesIO(response.content)
+            mask_image = Image.open(mask_bytes)
+            st.session_state.result_mask = mask_image
+            return True
+        else:
+            st.error(f"API Error: {response.text}")
+            return False
+
+    except Exception as e:
+        st.error(f"Error processing image: {str(e)}")
+        return False
 
 def main():
     st.set_page_config(page_title="Multi-Modal Computer Vision UI", layout="wide")
@@ -207,15 +233,18 @@ def main():
         if st.session_state.processing_mode:
             st.info(f"Last processing mode: **{st.session_state.processing_mode.upper()}**")
             
-            # This is where you'll display the actual results
-            # For now, showing placeholders
+            # Display results based on processing mode
             if st.session_state.processing_mode == "touch":
                 st.markdown("**SAM Results:** Mask generation from click point")
             elif st.session_state.processing_mode in ["voice", "text"]:
                 st.markdown("**GroundingDINO + SAM Results:** Object detection and segmentation")
-            
-            # Placeholder for result visualization
-            st.info("🔄 Integration points ready for SAM and GroundingDINO models")
+                if st.session_state.result_mask is not None:
+                    # Display the original image and mask side by side
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.image(image, caption="Original Image")
+                    with col2:
+                        st.image(st.session_state.result_mask, caption="Generated Mask")
     
     else:
         st.info("👆 Please upload an image to get started")
