@@ -67,7 +67,7 @@ WORKDIR $HOME
 RUN pip install 'git+https://github.com/facebookresearch/segment-anything.git'
 # RUN pip install supervision==0.6.0
 # RUN pip install roboflow
-
+COPY script.py $HOME/
 # Copy the script into the container
 COPY completebuild.ipynb $HOME/
 WORKDIR $HOME
