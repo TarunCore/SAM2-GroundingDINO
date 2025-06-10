@@ -29,11 +29,6 @@ RUN pip install --no-cache-dir -r requirements2.txt
 
 # ENV TORCH_CUDA_ARCH_LIST="6.0;6.1;7.0;7.5;8.0;8.6+PTX;8.9;9.0"
 ENV CUDA_HOME=/usr/local/cuda
-# Install GroundingDINO and SAM
-# RUN git clone https://github.com/IDEA-Research/GroundingDINO.git $HOME/GroundingDINO
-# WORKDIR $HOME/GroundingDINO
-# # RUN git checkout -q 57535c5a79791cb76e36fdb64975271354f10251
-# RUN pip install -e .
 
 WORKDIR $HOME
 # Install Python dependencies
@@ -63,12 +58,20 @@ RUN wget -q https://media.roboflow.com/notebooks/examples/dog-6.jpeg
 RUN wget -q https://media.roboflow.com/notebooks/examples/dog-7.jpeg
 RUN wget -q https://media.roboflow.com/notebooks/examples/dog-8.jpeg
 
-# WORKDIR $HOME
-# RUN pip install 'git+https://github.com/facebookresearch/segment-anything.git'
-# # RUN pip install supervision==0.6.0
-# # RUN pip install roboflow
+# Install GroundingDINO and SAM
+RUN git clone https://github.com/IDEA-Research/GroundingDINO.git $HOME/GroundingDINO
+WORKDIR $HOME/GroundingDINO
+RUN git checkout -q 57535c5a79791cb76e36fdb64975271354f10251
+# Do this after container is built as during building /usr/local/cuda is not available
+# RUN pip install -v -e . 
+
+WORKDIR $HOME
+RUN pip install 'git+https://github.com/facebookresearch/segment-anything.git'
+# RUN pip install supervision==0.6.0
+# RUN pip install roboflow
 
 # Copy the script into the container
+COPY script.py $HOME/
 COPY completebuild.ipynb $HOME/
 WORKDIR $HOME
 EXPOSE 8888
